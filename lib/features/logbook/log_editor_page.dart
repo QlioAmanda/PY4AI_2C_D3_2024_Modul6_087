@@ -157,14 +157,23 @@ class _LogEditorPageState extends State<LogEditorPage> {
                         isExpanded: true,
                         items: _categories.map((String value) {
                           // Menentukan warna berdasarkan kategori (seperti LogView)
+                          // PERBAIKAN 1: Menambahkan kurung kurawal pada if-else
                           Color catColor;
-                          if (value == 'Pribadi') catColor = const Color(0xFFC084FC); // Purple
-                          else if (value == 'Urgent') catColor = const Color(0xFFF43F5E); // Rose Red
-                          else if (value == 'Mechanical') catColor = const Color(0xFF14B8A6); // Teal
-                          else if (value == 'Electronic') catColor = const Color(0xFF6366F1); // Indigo
-                          else if (value == 'Software') catColor = const Color(0xFFF59E0B); // Amber
-                          else if (value == 'Pekerjaan') catColor = const Color(0xFF0EA5E9); // Sky Blue
-                          else catColor = const Color(0xFF94A3B8); // Slate
+                          if (value == 'Pribadi') {
+                            catColor = const Color(0xFFC084FC); // Purple
+                          } else if (value == 'Urgent') {
+                            catColor = const Color(0xFFF43F5E); // Rose Red
+                          } else if (value == 'Mechanical') {
+                            catColor = const Color(0xFF14B8A6); // Teal
+                          } else if (value == 'Electronic') {
+                            catColor = const Color(0xFF6366F1); // Indigo
+                          } else if (value == 'Software') {
+                            catColor = const Color(0xFFF59E0B); // Amber
+                          } else if (value == 'Pekerjaan') {
+                            catColor = const Color(0xFF0EA5E9); // Sky Blue
+                          } else {
+                            catColor = const Color(0xFF94A3B8); // Slate
+                          }
                           
                           return DropdownMenuItem<String>(
                             value: value, 
@@ -198,7 +207,8 @@ class _LogEditorPageState extends State<LogEditorPage> {
                           _isPublic = value;
                         });
                       },
-                      activeColor: const Color(0xFF3B82F6),
+                      // PERBAIKAN 2: activeColor diganti menjadi activeThumbColor
+                      activeThumbColor: const Color(0xFF3B82F6),
                     ),
                   ),
                   const SizedBox(height: 12),
