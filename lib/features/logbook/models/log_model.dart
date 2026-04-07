@@ -24,8 +24,11 @@ class LogModel {
   @HiveField(5)
   final String author; 
 
-  @HiveField(6)
-  final String teamId; // Tambahan wajib untuk Modul 5
+  @HiveField(6, defaultValue: 'no_team')
+  final String teamId;
+
+  @HiveField(7, defaultValue: false)
+  final bool isPublic;
 
   LogModel({
     this.id,
@@ -34,32 +37,35 @@ class LogModel {
     required this.description,
     required this.category,
     required this.author,
-    required this.teamId, // Wajib diisi
+    required this.teamId,
+    this.isPublic = false,
   });
 
   // Konversi dari Cloud (BSON) ke Aplikasi
   factory LogModel.fromMap(Map<String, dynamic> map) {
     return LogModel(
-      id: (map['_id'] as ObjectId?)?.oid, // Convert ObjectId dari Mongo ke String
+      id: (map['_id'] as ObjectId?)?.oid,
       title: map['title'] ?? '',
       date: map['date'] ?? '',
       description: map['description'] ?? '',
       category: map['category'] ?? 'Pekerjaan',
       author: map['author'] ?? 'Unknown',
       teamId: map['teamId'] ?? 'no_team',
+      isPublic: map['isPublic'] ?? false,
     );
   }
 
   // Konversi dari Aplikasi ke Cloud (BSON)
   Map<String, dynamic> toMap() {
     return {
-      if (id != null) '_id': ObjectId.fromHexString(id!), // Convert balik ke ObjectId
+      if (id != null) '_id': ObjectId.fromHexString(id!),
       'title': title,
       'date': date,
       'description': description,
       'category': category,
       'author': author,
       'teamId': teamId,
+      'isPublic': isPublic,
     };
   }
 }

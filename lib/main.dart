@@ -15,6 +15,7 @@ void main() async {
   await Hive.initFlutter();
   Hive.registerAdapter(LogModelAdapter()); 
   await Hive.openBox<LogModel>('offline_logs');
+  await Hive.openBox('sync_queue'); // Box untuk menyimpan aksi offline (add, update, delete)
   // ------------------------------------------------
 
   // 3. Inisialisasi Koneksi Database (Cloud)

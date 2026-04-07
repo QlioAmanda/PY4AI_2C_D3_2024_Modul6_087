@@ -17,14 +17,14 @@ class AccessControlService {
   };
 
   static bool canPerform(String role, String action, {bool isOwner = false}) {
-  // ATURAN TASK 5: Hanya pemilik (Owner) yang boleh Update atau Delete
-  // Mengabaikan Role 'Ketua' untuk aksi ini
-  if (action == actionUpdate || action == actionDelete) {
-    return isOwner; // Hanya kembalikan status kepemilikan
-  }
+    // ATURAN TASK 5: Hanya pemilik (Owner) yang boleh Update atau Delete
+    // Mengabaikan Role 'Ketua' untuk aksi ini
+    if (action == actionUpdate || action == actionDelete) {
+      return isOwner; // Mutlak hanya pemilik catatan yang bisa edit/hapus
+    }
   
-  final permissions = _rolePermissions[role] ?? [];
-  return permissions.contains(action);
-}
+    final permissions = _rolePermissions[role] ?? [];
+    return permissions.contains(action);
+  }
 
 }

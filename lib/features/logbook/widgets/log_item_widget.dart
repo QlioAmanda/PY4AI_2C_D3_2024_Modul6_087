@@ -20,7 +20,10 @@ class LogItemWidget extends StatelessWidget {
     required this.onTap,
     required this.onEdit,
     required this.onDelete,
+    this.onSyncTap,
   });
+
+  final VoidCallback? onSyncTap;
 
   String _formatDate(String isoDate) {
     try {
@@ -31,9 +34,12 @@ class LogItemWidget extends StatelessWidget {
 
   Color get _categoryColor {
     switch (log.category) {
-      case 'Pribadi': return const Color(0xFFAB47BC);
-      case 'Urgent': return const Color(0xFFEF5350);
-      case 'Pekerjaan': default: return const Color(0xFF1565C0);
+      case 'Pribadi': return const Color(0xFFC084FC); // Purple
+      case 'Urgent': return const Color(0xFFF43F5E); // Rose Red
+      case 'Mechanical': return const Color(0xFF14B8A6); // Teal
+      case 'Electronic': return const Color(0xFF6366F1); // Indigo
+      case 'Software': return const Color(0xFFF59E0B); // Amber
+      case 'Pekerjaan': default: return const Color(0xFF0EA5E9); // Sky Blue
     }
   }
   
@@ -41,6 +47,9 @@ class LogItemWidget extends StatelessWidget {
     switch (log.category) {
       case 'Pribadi': return Icons.favorite_rounded;
       case 'Urgent': return Icons.warning_rounded;
+      case 'Mechanical': return Icons.settings_rounded;
+      case 'Electronic': return Icons.memory_rounded;
+      case 'Software': return Icons.code_rounded;
       case 'Pekerjaan': default: return Icons.work_rounded;
     }
   }
@@ -72,8 +81,14 @@ class LogItemWidget extends StatelessWidget {
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
-          border: Border(left: BorderSide(color: themeColor, width: 6)),
-          boxShadow: [ BoxShadow(color: Colors.blueGrey.withValues(alpha: 0.1), blurRadius: 10, offset: const Offset(0, 4)) ],
+          border: Border.all(color: Colors.blue.shade50, width: 1.5), // subtle blue border
+          boxShadow: [
+            BoxShadow(
+              color: Colors.blue.shade900.withValues(alpha: 0.05), // subtle blue shadow
+              blurRadius: 12,
+              offset: const Offset(0, 4)
+            )
+          ],
         ),
         child: Material(
           color: Colors.transparent,
@@ -88,10 +103,20 @@ class LogItemWidget extends StatelessWidget {
                     // --- TAMBAHAN TASK 4: INDIKATOR CLOUD/SYNC ---
                     Column(
                       children: [
-                        Icon(
-                          log.id != null ? Icons.cloud_done : Icons.cloud_upload_outlined,
-                          size: 16,
-                          color: log.id != null ? Colors.green : Colors.orange,
+                        Tooltip(
+                          message: log.id != null ? "Tersimpan di Cloud" : "Ketuk untuk Sinkronisasi",
+                          child: InkWell(
+                            onTap: log.id == null ? onSyncTap : null,
+                            borderRadius: BorderRadius.circular(12),
+                            child: Padding(
+                              padding: const EdgeInsets.all(4.0),
+                              child: Icon(
+                                log.id != null ? Icons.cloud_done_rounded : Icons.cloud_sync_rounded,
+                                size: 20,
+                                color: log.id != null ? Colors.teal.shade500 : Colors.amber.shade600,
+                              ),
+                            ),
+                          ),
                         ),
                         const SizedBox(height: 4),
                         Container(
@@ -113,9 +138,20 @@ class LogItemWidget extends StatelessWidget {
                           spacing: 6, runSpacing: 4,
                           children: [
                             Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(color: themeColor.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(4)),
-                              child: Text(log.category.toUpperCase(), style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: themeColor)),
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: themeColor.withValues(alpha: 0.1), 
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: themeColor.withValues(alpha: 0.3), width: 1),
+                              ),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(_categoryIcon, size: 10, color: themeColor),
+                                  const SizedBox(width: 4),
+                                  Text(log.category.toUpperCase(), style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: themeColor, letterSpacing: 0.5)),
+                                ],
+                              ),
                             ),
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),

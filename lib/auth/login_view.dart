@@ -16,9 +16,10 @@ class _LoginViewState extends State<LoginView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   bool _isObscure = true;
 
-  final Color _bgBlue = const Color(0xFFE1F5FE);     
-  final Color _primaryBlue = const Color(0xFF1565C0); 
-  final Color _errorRed = const Color(0xFFD32F2F);   
+  // PREMIUM BLUE & WHITE THEME
+  final Color _bgBlue = const Color(0xFFF4F7FA);     
+  final Color _primaryBlue = const Color(0xFF2563EB); 
+  final Color _errorRed = const Color(0xFFEF4444);   
 
   @override
   void dispose() {
@@ -62,14 +63,15 @@ class _LoginViewState extends State<LoginView> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Container(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(28),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   color: Colors.white,
+                  border: Border.all(color: Colors.blue.shade50, width: 2),
                   boxShadow: [
                     BoxShadow(
-                      color: _primaryBlue.withValues(alpha: 0.2),
-                      blurRadius: 20, offset: const Offset(0, 10),
+                      color: _primaryBlue.withValues(alpha: 0.15),
+                      blurRadius: 24, offset: const Offset(0, 12),
                     )
                   ],
                 ),
@@ -80,11 +82,12 @@ class _LoginViewState extends State<LoginView> {
                 padding: const EdgeInsets.all(30),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(24),
+                  border: Border.all(color: Colors.blue.shade50, width: 1.5),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.05),
-                      blurRadius: 30, offset: const Offset(0, 15),
+                      color: Colors.blue.shade900.withValues(alpha: 0.04), // subtle shadow
+                      blurRadius: 32, offset: const Offset(0, 16),
                     ),
                   ],
                 ),
@@ -92,10 +95,10 @@ class _LoginViewState extends State<LoginView> {
                   key: _formKey,
                   child: Column(
                     children: [
-                      Text("Welcome Back", style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Colors.blueGrey.shade800, letterSpacing: 0.5)),
-                      const SizedBox(height: 8),
-                      Text("Silakan masuk untuk melanjutkan catatan harianmu di LogBook pribadi.", style: TextStyle(color: Colors.blueGrey.shade400, fontSize: 14)),
-                      const SizedBox(height: 30),
+                      Text("Welcome Back", style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: const Color(0xFF0F172A), letterSpacing: -0.5)),
+                      const SizedBox(height: 12),
+                      Text("Silakan masuk untuk melanjutkan catatan harianmu di LogBook pribadi.", textAlign: TextAlign.center, style: TextStyle(color: const Color(0xFF64748B), fontSize: 15, height: 1.5)),
+                      const SizedBox(height: 32),
                       _buildTextField(_userC, "Username", Icons.person_outline_rounded),
                       const SizedBox(height: 16),
                       _buildTextField(_passC, "Password", Icons.lock_outline_rounded, isPass: true),
@@ -112,9 +115,9 @@ class _LoginViewState extends State<LoginView> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: _primaryBlue,
                                 foregroundColor: Colors.white,
-                                elevation: isLocked ? 0 : 8,
-                                shadowColor: _primaryBlue.withValues(alpha: 0.4),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                elevation: isLocked ? 0 : 4,
+                                shadowColor: _primaryBlue.withValues(alpha: 0.3),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                               ),
                               child: isLocked 
                                 ? Row(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -148,11 +151,11 @@ class _LoginViewState extends State<LoginView> {
       decoration: InputDecoration(
         labelText: label, labelStyle: TextStyle(color: Colors.blueGrey.shade400), prefixIcon: Icon(icon, color: _primaryBlue),
         filled: true, fillColor: Colors.grey.shade50, counterText: "",
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide.none),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: Colors.grey.shade200)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: _primaryBlue, width: 2)),
-        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(15), borderSide: BorderSide(color: _errorRed)),
-        suffixIcon: isPass ? IconButton(icon: Icon(_isObscure ? Icons.visibility_off : Icons.visibility, color: Colors.blueGrey.shade300), onPressed: () => setState(() => _isObscure = !_isObscure)) : null,
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide.none),
+        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: Colors.blue.shade50, width: 1.5)),
+        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: _primaryBlue, width: 2)),
+        errorBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(16), borderSide: BorderSide(color: _errorRed, width: 1.5)),
+        suffixIcon: isPass ? IconButton(icon: Icon(_isObscure ? Icons.visibility_off_rounded : Icons.visibility_rounded, color: const Color(0xFF94A3B8)), onPressed: () => setState(() => _isObscure = !_isObscure)) : null,
       ),
       validator: (v) => isPass ? (v!.length < 3 ? 'Minimal 3 karakter!' : null) : (v!.isEmpty ? 'Username wajib diisi!' : null),
     );

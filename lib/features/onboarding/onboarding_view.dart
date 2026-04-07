@@ -20,22 +20,22 @@ class _OnboardingViewState extends State<OnboardingView> with SingleTickerProvid
       "img": "assets/images/icon_work.png",
       "title": "Kelola Pekerjaan dengan Efektif",
       "desc": "Ubah tumpukan tugas menjadi pencapaian. Kelola deadline dengan presisi untuk karir yang cemerlang.",
-      "color": const Color(0xFFE3F2FD), 
-      "accent": const Color(0xFF1565C0), 
+      "color": const Color(0xFFF4F7FA), // Soft bluish white
+      "accent": const Color(0xFF2563EB), // Royal Blue
     },
     {
       "img": "assets/images/icon_personal.png",
       "title": "Ruang Cerita Pribadi",
       "desc": "Setiap ide dan perasaan berhak didengar. Simpan kenangan manismu dalam jurnal yang aman.",
-      "color": const Color(0xFFF3E5F5), 
-      "accent": const Color(0xFF7B1FA2), 
+      "color": const Color(0xFFE0E7FF), // Light indigo tint
+      "accent": const Color(0xFF4F46E5), // Indigo
     },
     {
       "img": "assets/images/icon_urgent.png",
       "title": "Fokus Tanpa Batas",
       "desc": "Jangan biarkan hal penting terlewat. Prioritaskan target utamamu dan selesaikan tantangan hari ini!",
-      "color": const Color(0xFFFFF3E0), 
-      "accent": const Color(0xFFE64A19), 
+      "color": const Color(0xFFFEF3C7), // Light amber/orange tint
+      "accent": const Color(0xFFD97706), // Deep Orange/Amber
     }
   ];
 
@@ -77,15 +77,29 @@ class _OnboardingViewState extends State<OnboardingView> with SingleTickerProvid
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     // JUDUL "LOGBOOK"
-                    Text(
-                      "LOGBOOK",
-                      style: TextStyle(
-                        fontFamily: 'serif', // Font Serif agar terlihat elegan/klasik
-                        fontSize: 22,
-                        fontWeight: FontWeight.w900, // Sangat tebal
-                        letterSpacing: 4.0, // Jarak antar huruf lebar (Kesan Mewah)
-                        color: activeAccent, // Warna mengikuti tema
-                      ),
+                    Row(
+                      children: [
+                        AnimatedContainer(
+                          duration: const Duration(milliseconds: 600),
+                          padding: const EdgeInsets.all(6),
+                          decoration: BoxDecoration(
+                            color: activeAccent.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: activeAccent.withValues(alpha: 0.3)),
+                          ),
+                          child: Icon(Icons.auto_stories_rounded, color: activeAccent, size: 20),
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          "LOGBOOK PRO",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.w900, 
+                            letterSpacing: 2.0, 
+                            color: activeAccent, 
+                          ),
+                        ),
+                      ],
                     ),
                     
                     // TOMBOL LEWATI
@@ -155,16 +169,16 @@ class _OnboardingViewState extends State<OnboardingView> with SingleTickerProvid
           Text(
             item["title"],
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 28, fontWeight: FontWeight.w900,
-              color: Colors.black87, fontFamily: 'Roboto', letterSpacing: -0.5,
+              color: Color(0xFF0F172A), fontFamily: 'Roboto', letterSpacing: -0.5,
             ),
           ),
           const SizedBox(height: 16),
           Text(
             item["desc"],
             textAlign: TextAlign.center,
-            style: const TextStyle(fontSize: 16, color: Colors.black54, height: 1.6),
+            style: const TextStyle(fontSize: 16, color: Color(0xFF475569), height: 1.6),
           ),
         ],
       ),

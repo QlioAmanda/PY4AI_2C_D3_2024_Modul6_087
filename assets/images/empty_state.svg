@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 600">
+  <defs>
+    <linearGradient id="g1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#E1F5FE"/>
+      <stop offset="100%" stop-color="#BBDEFB"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#1E3A8A" flood-opacity="0.1"/>
+    </filter>
+  </defs>
+
+  <rect width="800" height="600" fill="transparent"/>
+
+  <!-- Background Blobs -->
+  <path d="M 400 150 C 550 100, 650 250, 550 400 C 450 550, 250 500, 200 350 C 150 200, 250 200, 400 150 Z" fill="url(#g1)" opacity="0.6"/>
+  <circle cx="580" cy="200" r="40" fill="#93C5FD" opacity="0.4"/>
+  <circle cx="220" cy="420" r="60" fill="#BFDBFE" opacity="0.5"/>
+
+  <!-- Main Illustration Area -->
+  <g transform="translate(400, 320)" filter="url(#shadow)">
+    <!-- Clipboard Outline -->
+    <rect x="-90" y="-120" width="180" height="240" rx="16" fill="#FFFFFF"/>
+    <rect x="-90" y="-120" width="180" height="240" rx="16" fill="none" stroke="#60A5FA" stroke-width="6"/>
+
+    <!-- Clip at top -->
+    <path d="M -40 -130 L 40 -130 L 40 -110 L -40 -110 Z" fill="#3B82F6" rx="8"/>
+    <circle cx="0" cy="-120" r="12" fill="#2563EB"/>
+    <rect x="-30" y="-136" width="60" height="16" rx="6" fill="#1D4ED8"/>
+
+    <!-- Document Lines -->
+    <path d="M -50 -50 L 50 -50 M -50 -10 L 50 -10 M -50 30 L 20 30" stroke="#93C5FD" stroke-width="8" stroke-linecap="round"/>
+
+    <!-- Stylized Checkmarks / Graphics -->
+    <path d="M -60 70 L -40 90 L -10 60" fill="none" stroke="#10B981" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    
+    <circle cx="30" cy="80" r="24" fill="#FBBF24" opacity="0.8"/>
+  </g>
+
+  <!-- Floating Elements -->
+  <!-- Pencil -->
+  <g transform="translate(520, 250) rotate(45)">
+    <rect x="-10" y="-40" width="20" height="80" fill="#FDE047" rx="4"/>
+    <path d="M -10 -40 L 0 -60 L 10 -40 Z" fill="#FCA5A5"/>
+    <rect x="-10" y="40" width="20" height="16" fill="#D1D5DB" rx="4"/>
+    <rect x="-10" y="56" width="20" height="10" fill="#F87171" rx="4"/>
+  </g>
+
+  <!-- Sparkles -->
+  <path d="M 230 180 Q 250 180 250 160 Q 250 180 270 180 Q 250 180 250 200 Q 250 180 230 180 Z" fill="#FBBF24"/>
+  <path d="M 580 430 Q 590 430 590 420 Q 590 430 600 430 Q 590 430 590 440 Q 590 430 580 430 Z" fill="#60A5FA"/>
+
+</svg>

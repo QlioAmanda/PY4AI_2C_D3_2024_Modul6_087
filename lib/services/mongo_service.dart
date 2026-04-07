@@ -53,7 +53,7 @@ class MongoService {
       return data.map((json) => LogModel.fromMap(json)).toList();
     } catch (e) {
       await LogHelper.writeLog("ERROR: Fetch Failed - $e", source: _source, level: 1);
-      return [];
+      rethrow; // PENTING: Jangan return [], biarkan error ditangkap oleh LogController agar tidak menghapus data offline
     }
   }
 
