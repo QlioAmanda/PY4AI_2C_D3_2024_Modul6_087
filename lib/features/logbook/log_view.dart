@@ -8,6 +8,7 @@ import 'log_editor_page.dart';
 import '../../auth/login_view.dart';
 import 'widgets/log_item_widget.dart';
 import '../../services/mongo_service.dart'; 
+import '../vision/vision_view.dart';
 
 class LogView extends StatefulWidget {
   final String username;
@@ -328,14 +329,33 @@ class _LogViewState extends State<LogView> {
         ),
       ),
       drawer: _buildPremiumDrawer(),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: const Color(0xFF2563EB), 
-        foregroundColor: Colors.white,
-        elevation: 4,
-        highlightElevation: 8,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        onPressed: () => _goToEditor(),
-        child: const Icon(Icons.add_rounded, size: 32),
+      floatingActionButton: Row(
+        mainAxisAlignment: MainAxisAlignment.end,
+        children: [
+          FloatingActionButton(
+            heroTag: 'cameraBtn',
+            backgroundColor: const Color(0xFF0EA5E9), 
+            foregroundColor: Colors.white,
+            elevation: 4,
+            highlightElevation: 8,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) => const VisionView()));
+            },
+            child: const Icon(Icons.camera_alt, size: 28),
+          ),
+          const SizedBox(width: 16),
+          FloatingActionButton(
+            heroTag: 'addBtn',
+            backgroundColor: const Color(0xFF2563EB), 
+            foregroundColor: Colors.white,
+            elevation: 4,
+            highlightElevation: 8,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            onPressed: () => _goToEditor(),
+            child: const Icon(Icons.add_rounded, size: 32),
+          ),
+        ],
       ),
       body: Column(
         children: [
