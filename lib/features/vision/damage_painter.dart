@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DamagePainter extends CustomPainter {
+  final double mockX;
+  final double mockY;
+
+  DamagePainter({required this.mockX, required this.mockY});
+
   @override
   void paint(Canvas canvas, Size size) {
-    final centerX = size.width / 2;
-    final centerY = size.height / 2;
+    final centerX = mockX * size.width;
+    final centerY = mockY * size.height;
 
     // 1. Draw Target Box/Corner Brackets (Cyan/Blue Accent)
     final paint = Paint()
@@ -13,8 +18,8 @@ class DamagePainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
 
-    const double boxSize = 250.0;
-    const double lineLength = 20.0;
+    const double boxSize = 90.0;
+    const double lineLength = 15.0;
 
     // Top Left
     canvas.drawLine(Offset(centerX - boxSize / 2, centerY - boxSize / 2),
@@ -47,7 +52,7 @@ class DamagePainter extends CustomPainter {
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
       
-    const double crossSize = 8.0;
+    const double crossSize = 4.0;
     
     // Vertical line
     canvas.drawLine(Offset(centerX, centerY - crossSize), 
@@ -105,7 +110,7 @@ class DamagePainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(covariant DamagePainter oldDelegate) {
+    return oldDelegate.mockX != mockX || oldDelegate.mockY != mockY;
   }
 }

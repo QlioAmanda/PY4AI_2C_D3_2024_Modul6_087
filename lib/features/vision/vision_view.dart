@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
+import 'dart:async';
+import 'dart:math';
 import 'vision_controller.dart';
 import 'damage_painter.dart';
 
@@ -13,11 +15,37 @@ class VisionView extends StatefulWidget {
 class _VisionViewState extends State<VisionView> {
   final VisionController _visionController = VisionController();
 
+  double mockX = 0.5;
+  double mockY = 0.5;
+  int scanStep = 0;
+  Timer? _mockTimer;
+
   @override
   void initState() {
     super.initState();
     _visionController.initializeCamera();
     _visionController.addListener(_onControllerStateChanged);
+
+    _mockTimer = Timer.periodic(const Duration(milliseconds: 600), (timer) {
+      if (mounted) {
+        setState(() {
+          if (scanStep == 0) {
+            mockX = 0.45;
+            mockY = 0.45;
+          } else if (scanStep == 1) {
+            mockX = 0.55;
+            mockY = 0.45;
+          } else if (scanStep == 2) {
+            mockX = 0.55;
+            mockY = 0.55;
+          } else if (scanStep == 3) {
+            mockX = 0.45;
+            mockY = 0.55;
+          }
+          scanStep = (scanStep + 1) % 4;
+        });
+      }
+    });
   }
 
   void _onControllerStateChanged() {
@@ -28,6 +56,7 @@ class _VisionViewState extends State<VisionView> {
 
   @override
   void dispose() {
+    _mockTimer?.cancel();
     _visionController.removeListener(_onControllerStateChanged);
     _visionController.dispose();
     super.dispose();
@@ -110,7 +139,7 @@ class _VisionViewState extends State<VisionView> {
             // MOTS: Damage Painter (Static Anchor & Label)
             Positioned.fill(
               child: CustomPaint(
-                painter: DamagePainter(),
+                painter: DamagePainter(mockX: mockX, mockY: mockY),
               ),
             ),
           ],
