@@ -137,11 +137,12 @@ class _VisionViewState extends State<VisionView> {
               child: CameraPreview(controller),
             ),
             // MOTS: Damage Painter (Static Anchor & Label)
-            Positioned.fill(
-              child: CustomPaint(
-                painter: DamagePainter(mockX: mockX, mockY: mockY),
+            if (_visionController.isOverlayVisible)
+              Positioned.fill(
+                child: CustomPaint(
+                  painter: DamagePainter(mockX: mockX, mockY: mockY),
+                ),
               ),
-            ),
           ],
         ),
       ),
@@ -190,8 +191,17 @@ class _VisionViewState extends State<VisionView> {
               ),
             ),
           ),
-          // Empty space to balance the Flash toggle
-          const SizedBox(width: 48), 
+          // Overlay Visibility Toggle
+          IconButton(
+            icon: Icon(
+              _visionController.isOverlayVisible ? Icons.visibility : Icons.visibility_off,
+              color: Colors.white,
+              size: 28,
+            ),
+            onPressed: () {
+              _visionController.toggleOverlay();
+            },
+          ), 
         ],
       ),
     );

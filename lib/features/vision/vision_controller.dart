@@ -7,6 +7,12 @@ class VisionController extends ChangeNotifier {
   bool isInitialized = false;
   String? errorMessage;
   bool isFlashOn = false;
+  bool isOverlayVisible = true;
+
+  void toggleOverlay() {
+    isOverlayVisible = !isOverlayVisible;
+    notifyListeners();
+  }
 
   Future<void> toggleFlash() async {
     if (cameraController == null || !isInitialized) return;
