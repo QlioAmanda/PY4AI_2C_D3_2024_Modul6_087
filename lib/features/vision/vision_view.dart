@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'vision_controller.dart';
+import 'damage_painter.dart';
 
 class VisionView extends StatefulWidget {
   const VisionView({super.key});
@@ -106,10 +107,10 @@ class _VisionViewState extends State<VisionView> {
               aspectRatio: 1 / controller.value.aspectRatio,
               child: CameraPreview(controller),
             ),
-            // Scanner Overlay
+            // MOTS: Damage Painter (Static Anchor & Label)
             Positioned.fill(
               child: CustomPaint(
-                painter: ScannerOverlayPainter(color: Colors.blue.shade400),
+                painter: DamagePainter(),
               ),
             ),
           ],
@@ -168,52 +169,3 @@ class _VisionViewState extends State<VisionView> {
   }
 }
 
-class ScannerOverlayPainter extends CustomPainter {
-  final Color color;
-
-  ScannerOverlayPainter({required this.color});
-
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = color
-      ..strokeWidth = 4.0
-      ..style = PaintingStyle.stroke
-      ..strokeCap = StrokeCap.round;
-
-    const double cornerLength = 30.0;
-    const double padding = 16.0;
-
-    // Adjust coordinates to give border padding
-    final left = padding;
-    final top = padding;
-    final right = size.width - padding;
-    final bottom = size.height - padding;
-
-    // Top Left Frame
-    canvas.drawLine(Offset(left, top), Offset(left + cornerLength, top), paint);
-    canvas.drawLine(Offset(left, top), Offset(left, top + cornerLength), paint);
-
-    // Top Right Frame
-    canvas.drawLine(Offset(right, top), Offset(right - cornerLength, top), paint);
-    canvas.drawLine(Offset(right, top), Offset(right, top + cornerLength), paint);
-
-    // Bottom Left Frame
-    canvas.drawLine(Offset(left, bottom), Offset(left + cornerLength, bottom), paint);
-    canvas.drawLine(Offset(left, bottom), Offset(left, bottom - cornerLength), paint);
-
-    // Bottom Right Frame
-    canvas.drawLine(Offset(right, bottom), Offset(right - cornerLength, bottom), paint);
-    canvas.drawLine(Offset(right, bottom), Offset(right, bottom - cornerLength), paint);
-
-    // Center Scanning Line
-    final linePaint = Paint()
-      ..color = color.withValues(alpha: 0.6)
-      ..strokeWidth = 2.0;
-    canvas.drawLine(
-        Offset(left + 10, size.height / 2), Offset(right - 10, size.height / 2), linePaint);
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
-}
