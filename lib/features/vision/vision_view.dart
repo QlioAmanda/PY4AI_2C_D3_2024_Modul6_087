@@ -18,6 +18,7 @@ class _VisionViewState extends State<VisionView> {
   double mockX = 0.5;
   double mockY = 0.5;
   int scanStep = 0;
+  String currentDamage = 'Pothole D40';
   Timer? _mockTimer;
 
   @override
@@ -42,6 +43,13 @@ class _VisionViewState extends State<VisionView> {
             mockX = 0.45;
             mockY = 0.55;
           }
+
+          if (scanStep % 2 == 0) {
+            currentDamage = 'Pothole D40';
+          } else {
+            currentDamage = 'Longitudinal Crack D00';
+          }
+
           scanStep = (scanStep + 1) % 4;
         });
       }
@@ -171,7 +179,7 @@ class _VisionViewState extends State<VisionView> {
                 if (_visionController.isOverlayVisible)
                   Positioned.fill(
                     child: CustomPaint(
-                      painter: DamagePainter(mockX: mockX, mockY: mockY),
+                      painter: DamagePainter(mockX: mockX, mockY: mockY, damageType: currentDamage),
                     ),
                   ),
               ],

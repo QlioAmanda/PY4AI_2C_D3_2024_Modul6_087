@@ -3,17 +3,20 @@ import 'package:flutter/material.dart';
 class DamagePainter extends CustomPainter {
   final double mockX;
   final double mockY;
+  final String damageType;
 
-  DamagePainter({required this.mockX, required this.mockY});
+  DamagePainter({required this.mockX, required this.mockY, required this.damageType});
 
   @override
   void paint(Canvas canvas, Size size) {
     final centerX = mockX * size.width;
     final centerY = mockY * size.height;
 
-    // 1. Draw Target Box/Corner Brackets (Cyan/Blue Accent)
+    final Color paintColor = damageType.contains('D40') ? Colors.red : Colors.yellow;
+
+    // 1. Draw Target Box/Corner Brackets (Dynamic Color)
     final paint = Paint()
-      ..color = Colors.cyanAccent
+      ..color = paintColor
       ..strokeWidth = 2.0
       ..style = PaintingStyle.stroke
       ..strokeCap = StrokeCap.round;
@@ -47,7 +50,7 @@ class DamagePainter extends CustomPainter {
 
     // Center Crosshair (+)
     final crosshairPaint = Paint()
-      ..color = Colors.cyanAccent
+      ..color = paintColor
       ..strokeWidth = 2.0
       ..strokeCap = StrokeCap.round
       ..style = PaintingStyle.stroke;
@@ -66,10 +69,11 @@ class DamagePainter extends CustomPainter {
       color: Colors.white,
       fontSize: 14.0,
       fontWeight: FontWeight.bold,
+      shadows: [Shadow(color: Colors.black, offset: Offset(2, 2), blurRadius: 4.0)],
     );
 
-    const textSpan = TextSpan(
-      text: 'Searching for Road Damage...',
+    final textSpan = TextSpan(
+      text: damageType,
       style: textStyle,
     );
 
@@ -111,6 +115,8 @@ class DamagePainter extends CustomPainter {
 
   @override
   bool shouldRepaint(covariant DamagePainter oldDelegate) {
-    return oldDelegate.mockX != mockX || oldDelegate.mockY != mockY;
+    return oldDelegate.mockX != mockX || 
+           oldDelegate.mockY != mockY || 
+           oldDelegate.damageType != damageType;
   }
 }
