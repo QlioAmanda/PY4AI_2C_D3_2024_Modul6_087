@@ -1,9 +1,12 @@
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
+import 'package:permission_handler/permission_handler.dart' as ph;
 import 'package:flutter/foundation.dart';
+
+enum VisionStatus { initializing, ready, error, permissionDenied }
 
 class VisionController extends ChangeNotifier {
   CameraController? cameraController;
+  VisionStatus status = VisionStatus.initializing;
   bool isInitialized = false;
   String? errorMessage;
   bool isFlashOn = false;
@@ -31,11 +34,19 @@ class VisionController extends ChangeNotifier {
     }
   }
 
+  Future<void> openAppSettings() async {
+    await ph.openAppSettings();
+  }
+
   Future<void> initializeCamera() async {
     try {
+      status = VisionStatus.initializing;
+      notifyListeners();
+
       // 1. Handle permissions
-      var status = await Permission.camera.request();
-      if (!status.isGranted) {
+      var permissionStatus = await ph.Permission.camera.request();
+      if (!permissionStatus.isGranted) {
+        status = VisionStatus.permissionDenied;
         errorMessage = 'Izin kamera ditolak. Silakan aktifkan izin di pengaturan perangkat.';
         notifyListeners();
         return;
@@ -44,6 +55,7 @@ class VisionController extends ChangeNotifier {
       // 2. Get available cameras
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
+        status = VisionStatus.error;
         errorMessage = 'Kamera tidak ditemukan pada perangkat ini.';
         notifyListeners();
         return;
@@ -64,8 +76,10 @@ class VisionController extends ChangeNotifier {
 
       await cameraController!.initialize();
       isInitialized = true;
+      status = VisionStatus.ready;
       notifyListeners();
     } catch (e) {
+      status = VisionStatus.error;
       errorMessage = 'Terjadi kesalahan saat menginisialisasi kamera: $e';
       notifyListeners();
     }

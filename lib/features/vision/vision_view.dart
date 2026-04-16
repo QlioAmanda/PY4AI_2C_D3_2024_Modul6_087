@@ -87,66 +87,98 @@ class _VisionViewState extends State<VisionView> {
   }
 
   Widget _buildCameraBody() {
-    if (_visionController.errorMessage != null) {
-      return Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Text(
-          _visionController.errorMessage!,
-          style: const TextStyle(color: Colors.red, fontSize: 16),
-          textAlign: TextAlign.center,
-        ),
-      );
-    }
-
-    if (!_visionController.isInitialized || _visionController.cameraController == null) {
-      return const Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          CircularProgressIndicator(color: Colors.blue),
-          SizedBox(height: 16),
-          Text('Menginisialisasi Kamera...', style: TextStyle(color: Colors.white)),
-        ],
-      );
-    }
-
-    final controller = _visionController.cameraController!;
-    
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-      // Glowing blue border
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.blue.shade400, width: 2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.blue.shade600.withValues(alpha: 0.3),
-            blurRadius: 20,
-            spreadRadius: 2,
-          )
-        ],
-      ),
-      // Clip to keep the corners rounded
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(18),
-        child: Stack(
-          alignment: Alignment.center,
+    switch (_visionController.status) {
+      case VisionStatus.initializing:
+        return const Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            AspectRatio(
-              aspectRatio: 1 / controller.value.aspectRatio,
-              child: CameraPreview(controller),
-            ),
-            // MOTS: Damage Painter (Static Anchor & Label)
-            if (_visionController.isOverlayVisible)
-              Positioned.fill(
-                child: CustomPaint(
-                  painter: DamagePainter(mockX: mockX, mockY: mockY),
-                ),
-              ),
+            CircularProgressIndicator(color: Colors.blue),
+            SizedBox(height: 16),
+            Text('Menghubungkan ke Sensor Visual...', style: TextStyle(color: Colors.white)),
           ],
-        ),
-      ),
-    );
+        );
+
+      case VisionStatus.error:
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Text(
+            _visionController.errorMessage ?? 'Terjadi kesalahan internal.',
+            style: const TextStyle(color: Colors.red, fontSize: 16),
+            textAlign: TextAlign.center,
+          ),
+        );
+
+      case VisionStatus.permissionDenied:
+        return Container(
+          color: Colors.black,
+          width: double.infinity,
+          padding: const EdgeInsets.all(32.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              const Icon(Icons.videocam_off_rounded, color: Colors.white54, size: 72),
+              const SizedBox(height: 24),
+              const Text(
+                'Akses Kamera Ditolak.\nAplikasi memerlukan izin kamera untuk mendeteksi kerusakan jalan.',
+                style: TextStyle(color: Colors.white, fontSize: 16, height: 1.5),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 32),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                onPressed: () {
+                  _visionController.openAppSettings();
+                },
+                child: const Text('Buka Pengaturan', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+              ),
+            ],
+          ),
+        );
+
+      case VisionStatus.ready:
+        final controller = _visionController.cameraController!;
+        return Container(
+          margin: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+          // Glowing blue border
+          decoration: BoxDecoration(
+            color: Colors.black,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: Colors.blue.shade400, width: 2),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.blue.shade600.withValues(alpha: 0.3),
+                blurRadius: 20,
+                spreadRadius: 2,
+              )
+            ],
+          ),
+          // Clip to keep the corners rounded
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1 / controller.value.aspectRatio,
+                  child: CameraPreview(controller),
+                ),
+                // MOTS: Damage Painter (Static Anchor & Label)
+                if (_visionController.isOverlayVisible)
+                  Positioned.fill(
+                    child: CustomPaint(
+                      painter: DamagePainter(mockX: mockX, mockY: mockY),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        );
+    }
   }
 
   Widget _buildBottomControlBar() {
