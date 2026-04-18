@@ -684,6 +684,10 @@ class _LogViewState extends State<LogView> {
               children: [
                 _buildDrawerItem(Icons.dashboard_rounded, "Beranda Utama", isSelected: true, onTap: () => Navigator.pop(context)),
                 _buildDrawerItem(Icons.edit_note_rounded, "Tulis Catatan", onTap: () { Navigator.pop(context); _goToEditor(); }),
+                _buildDrawerItem(Icons.camera_rounded, "Studio Citra", onTap: () {
+                  Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (context) => const VisionView()));
+                }),
                 Padding(padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 8), child: Divider(color: Colors.blueGrey.shade100)),
                 _buildDrawerItem(Icons.sync_rounded, "Sinkronisasi Data", onTap: () { Navigator.pop(context); _initDatabase(); }),
                 _buildDrawerItem(Icons.info_outline_rounded, "Tentang Aplikasi", onTap: () {

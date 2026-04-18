@@ -364,7 +364,7 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
   }
   
   // --- Operasi Frekuensi Domain (Inverse FFT) ---
-  else if (['Low Pass', 'High Pass', 'Band Pass'].contains(filterName)) {
+  else if (['Low Pass', 'High Pass', 'Band Pass', 'Reduce Periodic Noise'].contains(filterName)) {
     int size = 128; // Pakai 128 agar performa komputasi HP aman
     img.Image resized = img.copyResize(processed, width: size, height: size);
     
@@ -393,9 +393,12 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
     // 3. TERAPKAN MASKING (Saringan Frekuensi)
     double rLow = 0;
     double rHigh = 9999;
+    bool isBandStop = false;
+
     if (filterName == 'Low Pass') { rHigh = 25; } // Cuma loloskan pusat
     else if (filterName == 'High Pass') { rLow = 15; } // Blokir pusat (DC)
     else if (filterName == 'Band Pass') { rLow = 10; rHigh = 35; } // Ambil bentuk cincin
+    else if (filterName == 'Reduce Periodic Noise') { isBandStop = true; rLow = 28; rHigh = 32; } // Blokir radius ~30
 
     for (int y = 0; y < size; y++) {
       for (int x = 0; x < size; x++) {
@@ -407,9 +410,15 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
         int origX = (x + size ~/ 2) % size;
         int origY = (y + size ~/ 2) % size;
 
-        // Hapus spektrum cahaya yang tidak masuk kriteria
-        if (dist < rLow || dist > rHigh) {
-           matrix[origY][origX] = Float64x2(0.0, 0.0); 
+        // Hapus spektrum cahaya sesuai mode filter
+        if (isBandStop) {
+           if (dist >= rLow && dist <= rHigh) {
+              matrix[origY][origX] = Float64x2(0.0, 0.0); 
+           }
+        } else {
+           if (dist < rLow || dist > rHigh) {
+              matrix[origY][origX] = Float64x2(0.0, 0.0); 
+           }
         }
       }
     }
@@ -462,8 +471,9 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
 class PcdEditorScreen extends StatefulWidget {
   final String imagePath;
   final List<String> fullFilters;
+  final VoidCallback? onBackToCamera;
 
-  const PcdEditorScreen({super.key, required this.imagePath, required this.fullFilters});
+  const PcdEditorScreen({super.key, required this.imagePath, required this.fullFilters, this.onBackToCamera});
 
   @override
   State<PcdEditorScreen> createState() => _PcdEditorScreenState();
@@ -481,7 +491,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
   static const List<String> histogramFilters = ['Grayscale', 'Hist. Equalization', 'Hist. Specification'];
   static const List<String> spasialFilters = ['Zero Padding', 'Conv: Average', 'Conv: Sharpen', 'Conv: Edge', 'Fourier Transform'];
   static const List<String> statistikFilters = ['Hitung Statistik'];
-  static const List<String> frekuensiFilters = ['Low Pass', 'High Pass', 'Band Pass'];
+  static const List<String> frekuensiFilters = ['Low Pass', 'High Pass', 'Band Pass', 'Reduce Periodic Noise'];
 
   Future<void> saveToGallery() async {
     try {
@@ -711,8 +721,62 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
     );
   }
 
-  @override
+ @override
   Widget build(BuildContext context) {
+    // 1. KITA CEK DULU: Apakah gambarnya kosong?
+    bool isImageEmpty = widget.imagePath.isEmpty;
+
+    // 2. JIKA KOSONG: Tampilkan layar "Pintu Gerbang" (Empty State)
+    if (isImageEmpty) {
+      return Scaffold(
+        backgroundColor: Colors.black,
+        appBar: AppBar(
+          title: const Text('PCD Editor', style: TextStyle(fontWeight: FontWeight.bold)),
+          backgroundColor: Colors.black,
+          foregroundColor: Colors.white,
+          centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (widget.onBackToCamera != null) {
+                widget.onBackToCamera!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image_search, size: 100, color: Colors.cyan.withOpacity(0.5)),
+              const SizedBox(height: 20),
+              const Text(
+                "Belum ada gambar yang dipilih.",
+                style: TextStyle(color: Colors.white70, fontSize: 16),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton.icon(
+                icon: const Icon(Icons.camera_alt),
+                label: const Text("Silahkan ambil gambar terlebih dahulu"),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.cyan,
+                  foregroundColor: Colors.black,
+                ),
+                onPressed: () {
+                  if (widget.onBackToCamera != null) {
+                    widget.onBackToCamera!();
+                  } else {
+                    Navigator.pop(context); 
+                  }
+                },
+              )
+            ],
+          ),
+        ),
+      );
+    }
     return DefaultTabController(
       length: 6,
       child: Scaffold(
@@ -722,6 +786,16 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
           backgroundColor: Colors.black,
           foregroundColor: Colors.white,
           centerTitle: true,
+          leading: IconButton(
+            icon: const Icon(Icons.arrow_back),
+            onPressed: () {
+              if (widget.onBackToCamera != null) {
+                widget.onBackToCamera!();
+              } else {
+                Navigator.pop(context);
+              }
+            },
+          ),
           actions: [
             IconButton(
               icon: const Icon(Icons.download),

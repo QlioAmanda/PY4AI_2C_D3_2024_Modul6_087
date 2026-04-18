@@ -28,6 +28,9 @@ class _VisionViewState extends State<VisionView> {
   bool simulateSaltPepper = false;
   Timer? _mockTimer;
 
+  int currentIndex = 0;
+  String currentImagePath = '';
+
   final List<String> pcdFilters = [
     'Normal', 'Grayscale', 'Brightness', 'Gelap', 'Kontras', 'Inverse (Negatif)', 'Hist. Equalization', 'Hist. Specification', 'Konversi Warna', 'Indexed',
     'Konvolusi', 'Average', 'Gaussian', 'Median Filter', 'Sharpen', 'Edge Detection',
@@ -90,21 +93,37 @@ class _VisionViewState extends State<VisionView> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: AppBar(
+      appBar: currentIndex == 0 ? AppBar(
         title: const Text('Vision Scanner', style: TextStyle(fontWeight: FontWeight.bold, letterSpacing: 1.2)),
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         centerTitle: true,
         elevation: 0,
-      ),
-      body: Column(
+      ) : null,
+      body: IndexedStack(
+        index: currentIndex,
         children: [
-          Expanded(
-            child: Center(
-              child: _buildCameraBody(),
-            ),
+          // Index 0: Scanner
+          Column(
+            children: [
+              Expanded(
+                child: Center(
+                  child: _buildCameraBody(),
+                ),
+              ),
+              _buildBottomControlBar(),
+            ],
           ),
-          _buildBottomControlBar(),
+          // Index 1: PcdEditorScreen didesain user
+          PcdEditorScreen(
+            imagePath: currentImagePath,
+            fullFilters: pcdFilters,
+            onBackToCamera: () {
+              setState(() {
+                currentIndex = 0; // Kembalikan ke halaman Scanner
+              });
+            },
+          ),
         ],
       ),
     );
@@ -460,12 +479,10 @@ class _VisionViewState extends State<VisionView> {
               final picker = ImagePicker();
               final XFile? image = await picker.pickImage(source: ImageSource.gallery);
               if (image != null && context.mounted) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PcdEditorScreen(imagePath: image.path, fullFilters: pcdFilters),
-                  ),
-                );
+                setState(() {
+                  currentImagePath = image.path;
+                  currentIndex = 1; // Pindah Tab otomatis
+                });
               }
             },
           ),
@@ -488,15 +505,10 @@ class _VisionViewState extends State<VisionView> {
                 Navigator.of(context).pop(); // Remove loading overlay
 
                 if (image != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => PcdEditorScreen(
-                        imagePath: image.path, 
-                        fullFilters: pcdFilters,
-                      ),
-                    ),
-                  );
+                  setState(() {
+                    currentImagePath = image.path;
+                    currentIndex = 1; // Pindah Tab Otomatis
+                  });
                 } else if (_visionController.errorMessage != null) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -527,9 +539,11 @@ class _VisionViewState extends State<VisionView> {
             ),
           ),
           IconButton(
-            icon: const Icon(Icons.tune, color: Colors.cyanAccent, size: 28),
+            icon: const Icon(Icons.edit, color: Colors.white, size: 28),
             onPressed: () {
-              _showFilterBottomSheet(context);
+              setState(() {
+                currentIndex = 1; // Pindah ke Editor Filter PCD
+              });
             },
           ),
           // Overlay Visibility Toggle
