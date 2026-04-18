@@ -85,6 +85,25 @@ class VisionController extends ChangeNotifier {
     }
   }
 
+  Future<XFile?> takePicture() async {
+    if (cameraController == null || !cameraController!.value.isInitialized) {
+      return null;
+    }
+
+    if (cameraController!.value.isTakingPicture) {
+      return null;
+    }
+
+    try {
+      final XFile file = await cameraController!.takePicture();
+      return file;
+    } catch (e) {
+      errorMessage = 'Gagal mengambil foto: $e';
+      notifyListeners();
+      return null;
+    }
+  }
+
   @override
   void dispose() {
     cameraController?.dispose();

@@ -471,8 +471,41 @@ class _VisionViewState extends State<VisionView> {
           ),
           // Prominent Capture Button
           GestureDetector(
-            onTap: () {
-              // TODO: Implement capture logic
+            onTap: () async {
+              showDialog(
+                context: context,
+                barrierDismissible: false,
+                builder: (BuildContext context) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: Colors.cyanAccent),
+                  );
+                },
+              );
+
+              final XFile? image = await _visionController.takePicture();
+              
+              if (context.mounted) {
+                Navigator.of(context).pop(); // Remove loading overlay
+
+                if (image != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => PcdEditorScreen(
+                        imagePath: image.path, 
+                        fullFilters: pcdFilters,
+                      ),
+                    ),
+                  );
+                } else if (_visionController.errorMessage != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(_visionController.errorMessage!), 
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
             child: Container(
               width: 76,
