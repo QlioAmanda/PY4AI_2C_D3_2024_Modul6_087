@@ -360,7 +360,97 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
         fourierImg.setPixelRgb(x, y, vLog, vLog, vLog);
       }
     }
-    processed = fourierImg;
+    processed = img.copyResize(fourierImg, width: processed.width, height: processed.height);
+  }
+  
+  // --- Operasi Frekuensi Domain (Inverse FFT) ---
+  else if (['Low Pass', 'High Pass', 'Band Pass'].contains(filterName)) {
+    int size = 128; // Pakai 128 agar performa komputasi HP aman
+    img.Image resized = img.copyResize(processed, width: size, height: size);
+    
+    // 1. Dekomposisi ke Bilangan Kompleks
+    List<Float64x2List> matrix = List.generate(size, (y) {
+      Float64x2List row = Float64x2List(size);
+      for (int x = 0; x < size; x++) {
+        final pixel = resized.getPixel(x, y);
+        double gray = pixel.r * 0.299 + pixel.g * 0.587 + pixel.b * 0.114;
+        row[x] = Float64x2(gray, 0.0);
+      }
+      return row;
+    });
+
+    final fft = FFT(size);
+
+    // 2. FORWARD FFT (Ubah ke Frequency Domain)
+    for (int y = 0; y < size; y++) fft.inPlaceFft(matrix[y]);
+    for (int x = 0; x < size; x++) {
+      Float64x2List col = Float64x2List(size);
+      for (int y = 0; y < size; y++) col[y] = matrix[y][x];
+      fft.inPlaceFft(col);
+      for (int y = 0; y < size; y++) matrix[y][x] = col[y];
+    }
+
+    // 3. TERAPKAN MASKING (Saringan Frekuensi)
+    double rLow = 0;
+    double rHigh = 9999;
+    if (filterName == 'Low Pass') { rHigh = 25; } // Cuma loloskan pusat
+    else if (filterName == 'High Pass') { rLow = 15; } // Blokir pusat (DC)
+    else if (filterName == 'Band Pass') { rLow = 10; rHigh = 35; } // Ambil bentuk cincin
+
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        int cx = x - (size ~/ 2);
+        int cy = y - (size ~/ 2);
+        double dist = sqrt(cx * cx + cy * cy);
+        
+        // Cari letak koordinat aslinya di memori matriks
+        int origX = (x + size ~/ 2) % size;
+        int origY = (y + size ~/ 2) % size;
+
+        // Hapus spektrum cahaya yang tidak masuk kriteria
+        if (dist < rLow || dist > rHigh) {
+           matrix[origY][origX] = Float64x2(0.0, 0.0); 
+        }
+      }
+    }
+
+    // 4. INVERSE FFT (Kembalikan ke Gambar Asli dengan taktik Konjugat)
+    // Baris
+    for (int y = 0; y < size; y++) {
+      for (int x=0; x<size; x++) matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+      fft.inPlaceFft(matrix[y]);
+      for (int x=0; x<size; x++) matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+    }
+    // Kolom
+    for (int x = 0; x < size; x++) {
+      Float64x2List col = Float64x2List(size);
+      for (int y = 0; y < size; y++) col[y] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+      fft.inPlaceFft(col);
+      for (int y = 0; y < size; y++) matrix[y][x] = Float64x2(col[y].x, -col[y].y); 
+    }
+
+    // 5. Render Hasil Akhir ke Grayscale
+    img.Image outputImg = img.Image(width: size, height: size);
+    double maxVal = 0.0;
+    
+    // Cari nilai maksimum dari magnitudo (dibagi dimensi matriks)
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        double val = matrix[y][x].x / (size * size); 
+        if (val > maxVal) maxVal = val;
+      }
+    }
+
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        double val = matrix[y][x].x / (size * size);
+        int v = ((val / maxVal) * 255).round().clamp(0, 255);
+        outputImg.setPixelRgb(x, y, v, v, v);
+      }
+    }
+
+    // Perbesar ukurannya agar proporsional dengan layar seperti sebelumnya
+    processed = img.copyResize(outputImg, width: processed.width, height: processed.height);
   }
 
   return img.encodeJpg(processed);
@@ -391,6 +481,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
   static const List<String> histogramFilters = ['Grayscale', 'Hist. Equalization', 'Hist. Specification'];
   static const List<String> spasialFilters = ['Zero Padding', 'Conv: Average', 'Conv: Sharpen', 'Conv: Edge', 'Fourier Transform'];
   static const List<String> statistikFilters = ['Hitung Statistik'];
+  static const List<String> frekuensiFilters = ['Low Pass', 'High Pass', 'Band Pass'];
 
   Future<void> saveToGallery() async {
     try {
@@ -623,7 +714,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
   @override
   Widget build(BuildContext context) {
     return DefaultTabController(
-      length: 5,
+      length: 6,
       child: Scaffold(
         backgroundColor: Colors.black,
         appBar: AppBar(
@@ -644,46 +735,49 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
         body: Column(
           children: [
             Expanded(
-              child: Container(
-                margin: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.blue.shade400, width: 2),
-                  borderRadius: BorderRadius.circular(12),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.blue.shade600.withValues(alpha: 0.2),
-                      blurRadius: 15,
-                      spreadRadius: 2,
-                    )
-                  ],
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(10),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      processedImageBytes != null
-                          ? Image.memory(
-                              processedImageBytes!,
-                              fit: BoxFit.contain,
-                            )
-                          : Image.file(
-                              File(widget.imagePath),
-                              fit: BoxFit.contain,
-                            ),
-                      if (isProcessing)
-                        Container(
-                          color: Colors.black54,
-                          child: const Center(
-                            child: CircularProgressIndicator(color: Colors.cyanAccent),
-                          ),
-                        ),
+              child: Center( 
+                child: Container(
+                  margin: const EdgeInsets.all(16.0),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.blue.shade400, width: 2),
+                    borderRadius: BorderRadius.circular(12),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.blue.shade600.withValues(alpha: 0.2),
+                        blurRadius: 15,
+                        spreadRadius: 2,
+                      )
                     ],
+                  ),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(10),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        processedImageBytes != null
+                            ? Image.memory(
+                                processedImageBytes!,
+                                fit: BoxFit.contain,
+                              )
+                            : Image.file(
+                                File(widget.imagePath),
+                                fit: BoxFit.contain,
+                              ),
+                        if (isProcessing)
+                          Positioned.fill( // Memastikan loading overlay tidak keluar dari bingkai
+                            child: Container(
+                              color: Colors.black54,
+                              child: const Center(
+                                child: CircularProgressIndicator(color: Colors.cyanAccent),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
                   ),
                 ),
               ),
             ),
-            
             // Dynamic UI Elements (Sliders & Upload Buttons)
             if (['Tambah', 'Kurang', 'Max', 'Min', 'Zero Padding'].contains(selectedFilter))
               Padding(
@@ -758,6 +852,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
                       Tab(text: 'Histogram'),
                       Tab(text: 'Spasial'),
                       Tab(text: 'Analisis'),
+                      Tab(text: 'Frekuensi'),
                     ],
                   ),
                   Expanded(
@@ -768,6 +863,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
                         _buildFilterWrap(histogramFilters),
                         _buildFilterWrap(spasialFilters),
                         _buildFilterWrap(statistikFilters),
+                        _buildFilterWrap(frekuensiFilters),
                       ],
                     ),
                   ),
