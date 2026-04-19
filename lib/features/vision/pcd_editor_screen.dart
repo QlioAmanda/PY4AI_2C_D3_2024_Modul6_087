@@ -22,7 +22,6 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
   if (originalImage == null) throw Exception("Failed to decode image");
 
   // Optimasi ukuran gambar agar konvolusi tidak nge-lag berlebihan 
-  // (Lebih baik menahan Max 1024 supaya CPU tak terbakar di mobile devices)
   img.Image processed = originalImage;
   if (processed.width > 1024 || processed.height > 1024) {
     processed = img.copyResize(processed, width: 1024);
