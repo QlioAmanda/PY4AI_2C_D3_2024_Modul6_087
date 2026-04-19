@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
 import 'dart:async';
-import 'dart:math';
 import 'package:image_picker/image_picker.dart';
 import 'vision_controller.dart';
 import 'damage_painter.dart';
@@ -271,191 +270,6 @@ class _VisionViewState extends State<VisionView> {
     return CameraPreview(controller);
   }
 
-  void _showFilterBottomSheet(BuildContext context) {
-    final tabWarna = ['Normal', 'Grayscale', 'Brightness', 'Gelap', 'Kontras', 'Inverse (Negatif)', 'Hist. Equalization', 'Hist. Specification', 'Konversi Warna', 'Indexed'];
-    final tabSpasial = ['Konvolusi', 'Average', 'Gaussian', 'Median Filter', 'Sharpen', 'Edge Detection'];
-    final tabMorfologi = ['Thresholding', 'Erosi', 'Dilasi', 'Opening', 'Closing', 'Boundary', 'Region Filling', 'Thinning', 'Skeleton', 'Convex Hull', 'Labelling'];
-    final tabMulti = ['AND', 'OR', 'XOR', 'NOT', 'Tambah', 'Kurang', 'MAX', 'MIN'];
-    final tabFrekuensi = ['Transformasi Fourier', 'Notch Filter'];
-    final tabAnalisis = ['Histogram', 'Ukur Jarak'];
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            Widget buildChoiceChips(List<String> filters) {
-              return SingleChildScrollView(
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 8.0, bottom: 24.0),
-                  child: Wrap(
-                    spacing: 8.0,
-                    runSpacing: 12.0,
-                    children: filters.map((String filter) {
-                      final isSelected = selectedFilter == filter;
-                      return ChoiceChip(
-                        label: Text(
-                          filter, 
-                          style: TextStyle(
-                            color: isSelected ? Colors.black : Colors.white,
-                            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                          ),
-                        ),
-                        selected: isSelected,
-                        selectedColor: Colors.cyanAccent,
-                        backgroundColor: Colors.grey.shade800,
-                        onSelected: (selected) {
-                          if (selected) {
-                            // Validation Logic
-                            final morphoRequiresThreshold = ['Erosi', 'Dilasi', 'Opening', 'Closing', 'Boundary', 'Region Filling', 'Thinning', 'Skeleton', 'Convex Hull', 'Labelling'];
-                            if (morphoRequiresThreshold.contains(filter) && !isThresholded) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Harus menggunakan Thresholding (Biner) terlebih dahulu!"), backgroundColor: Colors.red),
-                              );
-                              return; // Cancel assignment
-                            }
-                            
-                            if (filter == 'Notch Filter' && !isFourierMode) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text("Harus masuk ke mode Fourier terlebih dahulu!"), backgroundColor: Colors.red),
-                              );
-                              return; // Cancel assignment
-                            }
-
-                            // Dynamic Flag Toggling
-                            if (filter == 'Thresholding' || filter == 'Threshold') {
-                              isThresholded = true;
-                            } else if (filter == 'Transformasi Fourier') {
-                              isFourierMode = true;
-                            } else if (filter == 'Normal') {
-                               isThresholded = false;
-                               isFourierMode = false;
-                            }
-
-                            setModalState(() { selectedFilter = filter; });
-                            setState(() { selectedFilter = filter; });
-                          }
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-              );
-            }
-
-            return Container(
-              height: MediaQuery.of(context).size.height * 0.75,
-              decoration: BoxDecoration(
-                color: Colors.grey.shade900,
-                borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
-              ),
-              child: DefaultTabController(
-                length: 6,
-                child: Column(
-                  children: [
-                    const SizedBox(height: 12),
-                    Container(width: 48, height: 4, decoration: BoxDecoration(color: Colors.white24, borderRadius: BorderRadius.circular(4))),
-                    const SizedBox(height: 12),
-                    const Text('Katalog Filter PCD', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
-                    const SizedBox(height: 8),
-                    
-                    const TabBar(
-                      isScrollable: true,
-                      indicatorColor: Colors.cyanAccent,
-                      labelColor: Colors.cyanAccent,
-                      unselectedLabelColor: Colors.white54,
-                      tabAlignment: TabAlignment.start,
-                      dividerColor: Colors.white10,
-                      tabs: [
-                        Tab(text: "Warna"),
-                        Tab(text: "Spasial"),
-                        Tab(text: "Morfologi"),
-                        Tab(text: "Multi-Gambar"),
-                        Tab(text: "Frekuensi"),
-                        Tab(text: "Analisis"),
-                      ],
-                    ),
-                    
-                    Expanded(
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: TabBarView(
-                          children: [
-                            buildChoiceChips(tabWarna),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(child: buildChoiceChips(tabSpasial)),
-                                if (selectedFilter == 'Median Filter')
-                                  Container(
-                                    decoration: BoxDecoration(color: Colors.black26, borderRadius: BorderRadius.circular(12)),
-                                    margin: const EdgeInsets.only(bottom: 16),
-                                    child: CheckboxListTile(
-                                      title: const Text("Simulate Salt & Pepper Noise", style: TextStyle(color: Colors.white, fontSize: 14)),
-                                      value: simulateSaltPepper,
-                                      activeColor: Colors.cyanAccent,
-                                      checkColor: Colors.black,
-                                      onChanged: (val) {
-                                        if (val != null) {
-                                          setModalState(() { simulateSaltPepper = val; });
-                                          setState(() { simulateSaltPepper = val; });
-                                        }
-                                      },
-                                    ),
-                                  )
-                              ],
-                            ),
-                            buildChoiceChips(tabMorfologi),
-                            buildChoiceChips(tabMulti),
-                            buildChoiceChips(tabFrekuensi),
-                            buildChoiceChips(tabAnalisis),
-                          ],
-                        ),
-                      ),
-                    ),
-                    
-                    Container(
-                      padding: const EdgeInsets.fromLTRB(24.0, 16.0, 24.0, 32.0),
-                      decoration: const BoxDecoration(
-                        color: Colors.black12,
-                        border: Border(top: BorderSide(color: Colors.white10)),
-                      ),
-                      child: Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const Text('Intensitas Parameter', style: TextStyle(color: Colors.white70, fontSize: 14)),
-                              Text(filterIntensity.toStringAsFixed(2), style: const TextStyle(color: Colors.cyanAccent, fontWeight: FontWeight.bold, fontSize: 16)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Slider(
-                            value: filterIntensity,
-                            min: 0.0,
-                            max: 2.0,
-                            activeColor: Colors.cyanAccent,
-                            inactiveColor: Colors.white24,
-                            onChanged: (value) {
-                              setModalState(() { filterIntensity = value; });
-                              setState(() { filterIntensity = value; });
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   Widget _buildBottomControlBar() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 32.0),
@@ -501,22 +315,21 @@ class _VisionViewState extends State<VisionView> {
 
               final XFile? image = await _visionController.takePicture();
               
-              if (context.mounted) {
-                Navigator.of(context).pop(); // Remove loading overlay
+              if (!mounted) return;
+              Navigator.of(context).pop(); // Remove loading overlay
 
-                if (image != null) {
-                  setState(() {
-                    currentImagePath = image.path;
-                    currentIndex = 1; // Pindah Tab Otomatis
-                  });
-                } else if (_visionController.errorMessage != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text(_visionController.errorMessage!), 
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
+              if (image != null) {
+                setState(() {
+                  currentImagePath = image.path;
+                  currentIndex = 1; // Pindah Tab Otomatis
+                });
+              } else if (_visionController.errorMessage != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(_visionController.errorMessage!), 
+                    backgroundColor: Colors.red,
+                  ),
+                );
               }
             },
             child: Container(

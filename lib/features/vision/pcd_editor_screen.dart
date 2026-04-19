@@ -331,9 +331,13 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
 
     for (int x = 0; x < size; x++) {
       Float64x2List col = Float64x2List(size);
-      for (int y = 0; y < size; y++) col[y] = matrix[y][x];
+      for (int y = 0; y < size; y++) {
+        col[y] = matrix[y][x];
+      }
       fft.inPlaceFft(col);
-      for (int y = 0; y < size; y++) matrix[y][x] = col[y];
+      for (int y = 0; y < size; y++) {
+        matrix[y][x] = col[y];
+      }
     }
 
     List<List<double>> magMap = List.generate(size, (_) => List.filled(size, 0.0));
@@ -347,7 +351,9 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
         double imag = matrix[y][x].y;
         double mag = sqrt(real * real + imag * imag);
         magMap[shiftY][shiftX] = mag;
-        if (mag > maxMag) maxMag = mag;
+        if (mag > maxMag) {
+          maxMag = mag;
+        }
       }
     }
 
@@ -382,12 +388,18 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
     final fft = FFT(size);
 
     // 2. FORWARD FFT (Ubah ke Frequency Domain)
-    for (int y = 0; y < size; y++) fft.inPlaceFft(matrix[y]);
+    for (int y = 0; y < size; y++) {
+      fft.inPlaceFft(matrix[y]);
+    }
     for (int x = 0; x < size; x++) {
       Float64x2List col = Float64x2List(size);
-      for (int y = 0; y < size; y++) col[y] = matrix[y][x];
+      for (int y = 0; y < size; y++) {
+        col[y] = matrix[y][x];
+      }
       fft.inPlaceFft(col);
-      for (int y = 0; y < size; y++) matrix[y][x] = col[y];
+      for (int y = 0; y < size; y++) {
+        matrix[y][x] = col[y];
+      }
     }
 
     // 3. TERAPKAN MASKING (Saringan Frekuensi)
@@ -426,16 +438,24 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
     // 4. INVERSE FFT (Kembalikan ke Gambar Asli dengan taktik Konjugat)
     // Baris
     for (int y = 0; y < size; y++) {
-      for (int x=0; x<size; x++) matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+      for (int x = 0; x < size; x++) {
+        matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y);
+      }
       fft.inPlaceFft(matrix[y]);
-      for (int x=0; x<size; x++) matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+      for (int x = 0; x < size; x++) {
+        matrix[y][x] = Float64x2(matrix[y][x].x, -matrix[y][x].y);
+      }
     }
     // Kolom
     for (int x = 0; x < size; x++) {
       Float64x2List col = Float64x2List(size);
-      for (int y = 0; y < size; y++) col[y] = Float64x2(matrix[y][x].x, -matrix[y][x].y); 
+      for (int y = 0; y < size; y++) {
+        col[y] = Float64x2(matrix[y][x].x, -matrix[y][x].y);
+      }
       fft.inPlaceFft(col);
-      for (int y = 0; y < size; y++) matrix[y][x] = Float64x2(col[y].x, -col[y].y); 
+      for (int y = 0; y < size; y++) {
+        matrix[y][x] = Float64x2(col[y].x, -col[y].y);
+      }
     }
 
     // 5. Render Hasil Akhir ke Grayscale
@@ -446,7 +466,9 @@ Future<dynamic> _processImageInBackground(Map<String, dynamic> data) async {
     for (int y = 0; y < size; y++) {
       for (int x = 0; x < size; x++) {
         double val = matrix[y][x].x / (size * size); 
-        if (val > maxVal) maxVal = val;
+        if (val > maxVal) {
+          maxVal = val;
+        }
       }
     }
 
@@ -750,7 +772,7 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.image_search, size: 100, color: Colors.cyan.withOpacity(0.5)),
+              Icon(Icons.image_search, size: 100, color: Colors.cyan.withValues(alpha: 0.5)),
               const SizedBox(height: 20),
               const Text(
                 "Belum ada gambar yang dipilih.",
