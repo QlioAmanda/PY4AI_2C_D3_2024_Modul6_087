@@ -863,9 +863,9 @@ class _PcdEditorScreenState extends State<PcdEditorScreen> {
                       children: [
                         Expanded(
                           child: Slider(
-                            value: arithmeticValue,
-                            min: 0,
-                            max: selectedFilter == 'Zero Padding' ? 100 : 255,
+                            value: arithmeticValue.clamp(0.0, selectedFilter == 'Zero Padding' ? 100.0 : 255.0),
+                            min: 0.0,
+                            max: selectedFilter == 'Zero Padding' ? 100.0 : 255.0,
                             activeColor: Colors.cyanAccent,
                             inactiveColor: Colors.white24,
                             onChanged: (value) {
